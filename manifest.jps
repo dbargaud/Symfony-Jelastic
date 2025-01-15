@@ -29,7 +29,7 @@ nodes:
     cloudlets: 16
     nodeGroup: cp
     volumes:
-      - /var/www
+      - /var/www/webroot
     
 onInstall:
   - composer

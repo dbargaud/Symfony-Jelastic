@@ -72,7 +72,7 @@ actions:
   postgresql:
     cmd[cp]: |-
       apt-get install -y libpq-dev
-      docker-php-ext-install pgsql pdo pdo_pgsql mongodb imagick redis
+      #docker-php-ext-install pgsql pdo pdo_pgsql mongodb imagick redis
 
   npm:
     cmd[cp]: |-

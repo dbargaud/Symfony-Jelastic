@@ -24,7 +24,7 @@ nodes:
     count: 1
     cloudlets: 8
     
-  - image: php:8.2.6-apache
+  - image: php:8.2.6-apache-bullseye
     count: 1
     cloudlets: 16
     nodeGroup: cp

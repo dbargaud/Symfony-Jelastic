@@ -23,22 +23,32 @@ nodes:
     nodeGroup: bl
     count: 1
     cloudlets: 8
+    displayName: LoadBalancer
     
-  - image: php:8.2.6-apache-bullseye
+  - image: php:8.1.2-apache
     count: 1
-    cloudlets: 16
+    cloudlets: 8
     nodeGroup: cp
+    displayName: FrontWeb
+    env:
+      password: ${fn.password}
     volumes:
-      - /var/www/webroot
+      - /var/www
     
+  - image: redis:5-alpine
+    count: 1
+    cloudlets: 8
+    nodeGroup: redis
+    displayName: Redis
+    isSLBAccessEnabled: false
+
 onInstall:
   - composer
   - symfonycli
   - git
   - apacheConf
-  - postgresql
-  - if ("${settings.npm}") :
-      - npm
+  - npm
+  - php
 
 actions:
   composer:
@@ -47,13 +57,14 @@ actions:
       mv composer.phar /usr/bin/composer
       chmod +x /usr/bin/composer
     user: root
-  
+    
   symfonycli:
     cmd[cp]: |-
-      curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
+      echo 'deb [trusted=yes] https://repo.symfony.com/apt/ /' | tee /etc/apt/sources.list.d/symfony-cli.list
+      apt update
       apt install symfony-cli
     user: root
-
+  
   git:
     cmd[cp]: |-
       apt-get install -yqq --no-install-recommends git
@@ -66,20 +77,19 @@ actions:
       touch index.php
       cd /etc/apache2/sites-enabled
       rm 000-default.conf
-      wget https://raw.githubusercontent.com/dbargaud/Symfony-Jelastic/main/config/apache.conf
+      wget https://raw.githubusercontent.com/yoanbernabeu/Symfony-Jelastic/main/config/apache.conf
       apachectl restart
-  
-  postgresql:
-    cmd[cp]: |-
-      apt-get install -y libpq-dev
-      docker-php-ext-install pgsql pdo pdo_pgsql 
-      docker-php-ext-install mongodb 
-      docker-php-ext-install imagick 
-      docker-php-ext-install redis
 
   npm:
     cmd[cp]: |-
       apt install nodejs npm
 
+  php:
+    cmd[cp]: |-
+        curl -sSLf \
+        -o /usr/local/bin/install-php-extensions \
+        https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+        chmod +x /usr/local/bin/install-php-extensions && \
+        install-php-extensions intl pgsql pdo pdo_pgsql redis mongodb imagick
 success: |
   Your Symfony environment is ready to go!

@@ -77,7 +77,7 @@ actions:
       touch index.php
       cd /etc/apache2/sites-enabled
       rm 000-default.conf
-      wget https://raw.githubusercontent.com/yoanbernabeu/Symfony-Jelastic/main/config/apache.conf
+      wget https://raw.githubusercontent.com/dbargaud/Symfony-Jelastic/main/config/apache.conf
       apachectl restart
 
   npm:
@@ -91,5 +91,33 @@ actions:
         https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
         chmod +x /usr/local/bin/install-php-extensions && \
         install-php-extensions intl pgsql pdo pdo_pgsql redis mongodb imagick
+git:
+  autoUpdate: true
+  repo: https://your-git-repository-url.git
+  branch: master
+
+  hooks:
+    onAfterDeploy:
+      - action: exec
+        cmd[cp]: |
+          cd /var/www/webroot/ROOT && composer install --no-dev --optimize-autoloader
+      - action: exec
+        cmd[cp]: |
+          cd /var/www/webroot/ROOT && npm install
+      - action: exec
+        cmd[cp]: |
+          cd /var/www/webroot/ROOT && npm run build
+      - action: exec
+        cmd[cp]: |
+          symfony-build
+      - action: exec
+        cmd[cp]: |
+          symfony-deploy
+      - action: exec
+        cmd[cp]: |
+          cd /var/www/webroot/ROOT && php bin/console cache:clear --env=prod
+      - action: exec
+        cmd[cp]: |
+          cd /var/www/webroot/ROOT && php bin/console cache:warmup --env=prod
 success: |
   Your Symfony environment is ready to go!

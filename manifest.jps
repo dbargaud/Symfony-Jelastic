@@ -16,7 +16,7 @@ settings:
     - name: npm
       caption: Node and NPM ?
       type: toggle
-      value: false
+      value: true
 
 nodes:
   - nodeType: nginx
@@ -72,7 +72,10 @@ actions:
   postgresql:
     cmd[cp]: |-
       apt-get install -y libpq-dev
-      #docker-php-ext-install pgsql pdo pdo_pgsql mongodb imagick redis
+      docker-php-ext-install pgsql pdo pdo_pgsql 
+      docker-php-ext-install mongodb 
+      docker-php-ext-install imagick 
+      docker-php-ext-install redis
 
   npm:
     cmd[cp]: |-
